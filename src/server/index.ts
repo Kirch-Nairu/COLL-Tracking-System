@@ -5,6 +5,10 @@ import { authRoutes } from './routes/auth';
 import { memberRoutes } from './routes/members';
 import { eventRoutes } from './routes/events';
 import { attendanceRoutes } from './routes/attendance';
+import { dashboardRoutes } from './routes/dashboard';
+import { reportRoutes } from './routes/reports';
+import { officerRoutes } from './routes/officers';
+import { auditLogRoutes } from './routes/audit-log';
 import type { AppBindings } from './middleware/auth';
 
 const app = new Hono<AppBindings>();
@@ -15,6 +19,10 @@ app.get('/api/health', (c) => c.json({ ok: true, service: 'coll-attendance-syste
 app.route('/api/auth', authRoutes);
 app.route('/api/members', memberRoutes);
 app.route('/api/events', eventRoutes);
+app.route('/api/dashboard', dashboardRoutes);
+app.route('/api/reports', reportRoutes);
+app.route('/api/officers', officerRoutes);
+app.route('/api/audit', auditLogRoutes);
 app.route('/api', attendanceRoutes);
 
 app.notFound(async (c) => {
