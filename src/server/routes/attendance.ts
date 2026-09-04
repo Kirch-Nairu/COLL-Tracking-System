@@ -6,7 +6,7 @@ import { checkInSchema } from '../../shared/schemas';
 import { attendance, events, members } from '../db/schema';
 import { audit } from '../lib/audit';
 import { sha256 } from '../lib/crypto';
-import { localDateAndTime } from '../lib/time';
+import { classifyAttendance, localDateAndTime } from '../lib/time';
 import { requireAuth, requireRoles, type AppBindings } from '../middleware/auth';
 
 export const attendanceRoutes = new Hono<AppBindings>();
@@ -25,10 +25,10 @@ attendanceRoutes.post('/events/:eventId/check-in', requireRoles('SUPER_ADMIN', '
   if (!member) return c.json({ error: 'INVALID_QR' }, 404);
   if (member.status !== 'ACTIVE') return c.json({ error: 'MEMBER_INACTIVE' }, 409);
 
-  const now = new Date();
-  const local = localDateAndTime(now, event.timezone);
+  const scanTime = new Date();
+  const local = localDateAndTime(scanTime, event.timezone);
   if (local.date !== event.eventDate) return c.json({ error: 'EVENT_NOT_TODAY', eventDate: event.eventDate }, 409);
-  const status = local.time <= event.lateAfter ? 'PRESENT' : 'LATE';
+  const status = classifyAttendance(local.time, event.lateAfter);
   const officer = c.get('officer');
   const attendanceId = crypto.randomUUID();
 
@@ -37,7 +37,7 @@ attendanceRoutes.post('/events/:eventId/check-in', requireRoles('SUPER_ADMIN', '
       id: attendanceId,
       eventId,
       memberId: member.id,
-      scannedAt: now.toISOString(),
+      scannedAt: scanTime.toISOString(),
       status,
       scannedBy: officer.id,
       checkInMethod: input.checkInMethod
@@ -57,7 +57,7 @@ attendanceRoutes.post('/events/:eventId/check-in', requireRoles('SUPER_ADMIN', '
   await audit(db, officer.id, 'ATTENDANCE_RECORDED', 'ATTENDANCE', attendanceId, { eventId, memberId: member.id, status });
   return c.json({
     result: 'RECORDED',
-    attendance: { id: attendanceId, eventId, memberId: member.id, scannedAt: now.toISOString(), status },
+    attendance: { id: attendanceId, eventId, memberId: member.id, scannedAt: scanTime.toISOString(), status },
     member: { id: member.id, memberNo: member.memberNo, fullName: member.fullName, position: member.position }
   }, 201);
 });

@@ -15,3 +15,7 @@ export function localDateAndTime(date: Date, timeZone: string) {
     time: `${get('hour')}:${get('minute')}`
   };
 }
+
+export function classifyAttendance(localTime: string, lateAfter: string): 'PRESENT' | 'LATE' {
+  return localTime <= lateAfter ? 'PRESENT' : 'LATE';
+}
