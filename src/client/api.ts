@@ -20,13 +20,16 @@ export function setToken(token: string | null) {
   else localStorage.removeItem('coll.session');
 }
 
-export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+function authHeaders(init: RequestInit = {}) {
   const headers = new Headers(init.headers);
   if (!headers.has('Content-Type') && init.body) headers.set('Content-Type', 'application/json');
   const token = getToken();
   if (token) headers.set('Authorization', `Bearer ${token}`);
+  return headers;
+}
 
-  const response = await fetch(path, { ...init, headers });
+export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(path, { ...init, headers: authHeaders(init) });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     if (response.status === 401) setToken(null);
@@ -34,4 +37,21 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     throw new ApiError(response.status, code, data);
   }
   return data as T;
+}
+
+export async function downloadApiFile(path: string, filename: string) {
+  const response = await fetch(path, { headers: authHeaders() });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, typeof data?.error === 'string' ? data.error : `HTTP_${response.status}`, data);
+  }
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
