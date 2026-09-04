@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - KURT-FOUNDATION-VERTICAL-SLICE-V1
+      - 'KURT-*'
   pull_request:
 
 jobs:
