@@ -9,8 +9,9 @@ Branch: `KURT-MASSIVE-SPRINT-MVP-V1`
 - Manual admin check-in fallback for unreadable/damaged QR
 - Privileged attendance status correction with mandatory reason + audit log
 - Individual member attendance history and attendance-rate baseline
-- Daily, per-event, and overall reports
+- Daily, monthly, per-event, and overall reports
 - Authenticated event CSV export
+- Server-generated event attendance PDF export
 - SUPER_ADMIN officer account management
 - ADMIN/SUPER_ADMIN audit log view
 - QR regeneration controls with explicit old-token revocation UX
@@ -32,8 +33,7 @@ Until COLL defines a more specific eligibility policy, an event is eligible for 
 
 ## Still outside this sprint
 
-- PDF report export
-- native XLSX export (CSV is Excel-compatible)
-- production Cloudflare D1 provisioning/credentials
-- real Android + iPhone device acceptance
-- optional certificates/R2
+- Native XLSX export (CSV remains Excel-compatible)
+- Production Cloudflare D1 provisioning/credentials
+- Real Android + iPhone device acceptance
+- Optional certificates/R2
